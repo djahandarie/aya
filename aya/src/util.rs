@@ -29,11 +29,17 @@ pub fn online_cpus() -> Result<Vec<u32>, io::Error> {
     })
 }
 
+lazy_static! {
+    static ref NR_CPUS: Result<usize, io::Error> = Ok(possible_cpus()?.len());
+}
 /// Get the number of possible cpus.
 ///
 /// See `/sys/devices/system/cpu/possible`.
 pub fn nr_cpus() -> Result<usize, io::Error> {
-    Ok(possible_cpus()?.len())
+    match NR_CPUS.as_ref() {
+        Ok(num) => Ok(*num),
+        Err(e) => Err(io::Error::new(e.kind(), e.to_string())),
+    }
 }
 
 /// Get the list of possible cpus.
